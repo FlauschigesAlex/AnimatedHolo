@@ -1,0 +1,16 @@
+name: '${project.name}'
+version: '${project.version}'
+api-version: '1.21.11'
+loader: 'at.flauschigesalex.animated_holo.core._loader.AnimatedHoloPluginLoader'
+main: 'at.flauschigesalex.animated_holo.core.AnimatedHoloPlugin'
+
+dependencies:
+  server:
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    ProtocolLib:
+      load: BEFORE
+      required: false
+      join-classpath: true
