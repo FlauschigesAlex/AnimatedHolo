@@ -1,4 +1,4 @@
-package at.flauschigesalex.animated_holo.core.holo.animation.list
+package at.flauschigesalex.animated_holo.lib.holo.animation.list
 
 import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
 import at.flauschigesalex.animated_holo.lib.holo.animation.HologramAnimation
@@ -8,7 +8,7 @@ import org.bukkit.util.Transformation
 import org.joml.Vector3f
 
 @Suppress("unused")
-private class BobbingAnimation : HologramAnimation<BobbingData>(
+object BobbingAnimation : HologramAnimation<BobbingData>(
     BobbingData(0)
 ) {
 
@@ -40,4 +40,5 @@ private class BobbingAnimation : HologramAnimation<BobbingData>(
     }
 }
 
-private data class BobbingData(val offset: Int, val increment: Boolean = true)
+@ConsistentCopyVisibility
+data class BobbingData internal constructor(val offset: Int, val increment: Boolean = true)

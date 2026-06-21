@@ -14,7 +14,7 @@ data class HologramConfiguration(
     var position: Position,
     val richLines: MutableList<String> = mutableListOf(id),
 
-    var animation: HologramAnimation<*>? = null,
+    var animation: HologramAnimation<*>? = HologramAnimation.defaultAnimation,
     private val attributes: MutableSet<HologramAttribute> = HologramAttribute.DEFAULT_ATTRIBUTES.toMutableSet(),
 
     var scale: Float = 1f,
@@ -29,9 +29,14 @@ data class HologramConfiguration(
     companion object;
     
     fun <HA: HologramAttribute> getAttribute(clazz: Class<HA>): HA? = attributes.filterIsInstance(clazz).firstOrNull()
+
+    fun <HA: HologramAttribute> removeAttribute(attribute: HA) = this.removeAttribute(attribute::class.java)
+    fun <HA: HologramAttribute> removeAttribute(attributeClass: Class<HA>) {
+        attributes.removeIf { it::class.java == attributeClass }
+    }
     
     fun <HA: HologramAttribute> setAttribute(attribute: HA) {
-        attributes.removeIf { it::class.java == attribute::class.java }
+        this.removeAttribute(attribute)
         attributes.add(attribute)
     }
     

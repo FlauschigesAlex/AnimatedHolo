@@ -247,6 +247,20 @@ object CommandRegister {
                     this.argument("attribute", LiteralArgumentType.literal()) {
                         this.argument("attribute", HologramAttributeArgumentType) {
                             this.argument("value", FloatArgumentType.positive()) {
+                                this.suggestions { context ->
+                                    val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@suggestions emptySet()
+                                    val attributeClass = context.arguments.byType<Class<out HologramAttribute>>()?.value ?: return@suggestions emptySet()
+                                    
+                                    holo.getAttribute(attributeClass)?.value?.let { 
+                                        return@suggestions setOf(it.toString())
+                                    }
+                                    
+                                    HologramAttribute.DEFAULT_ATTRIBUTES.find { it.javaClass == attributeClass }?.let { 
+                                        return@suggestions setOf(it.value.toString())
+                                    }
+                                    
+                                    return@suggestions setOf("1.0")
+                                }
                                 this.execute { context ->
                                     val sender = context.sender
                                     val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
@@ -259,6 +273,22 @@ object CommandRegister {
                                     val instance = constructor.newInstance(value) as HologramAttribute
                                     
                                     holo.setAttribute(instance)
+                                    Configuration.updateHolo(holo)
+                                }
+                            }
+                            this.argument("reset", LiteralArgumentType.literal()) {
+                                this.execute { context ->
+                                    val sender = context.sender
+                                    val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
+                                    val attributeClass = context.arguments.byType<Class<out HologramAttribute>>()?.value ?: return@execute
+                                    
+                                    val default = HologramAttribute.DEFAULT_ATTRIBUTES.find { 
+                                        it.javaClass == attributeClass
+                                    }
+                                    
+                                    if (default != null) holo.setAttribute(default)
+                                    else holo.removeAttribute(attributeClass)
+                                    
                                     Configuration.updateHolo(holo)
                                 }
                             }

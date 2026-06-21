@@ -1,4 +1,4 @@
-package at.flauschigesalex.animated_holo.lib.holo.animation.raytrace
+package at.flauschigesalex.animated_holo.lib.holo.raytrace._events
 
 import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
 import org.bukkit.entity.Player

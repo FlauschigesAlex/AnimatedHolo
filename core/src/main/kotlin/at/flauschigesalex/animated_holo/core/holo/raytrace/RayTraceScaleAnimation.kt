@@ -6,7 +6,7 @@ import at.flauschigesalex.animated_holo.core.holo.asTextDisplay
 import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
 import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverScaleAttribute
 import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverTransitionAttribute
-import at.flauschigesalex.animated_holo.lib.holo.animation.raytrace.RayTraceChangeEvent
+import at.flauschigesalex.animated_holo.lib.holo.raytrace._events.RayTraceChangeEvent
 import at.flauschigesalex.lib.minecraft.paper.base.internal.PaperListener
 import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.ProtocolLibrary

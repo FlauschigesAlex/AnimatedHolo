@@ -1,6 +1,7 @@
 package at.flauschigesalex.animated_holo.lib.holo.animation
 
 import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
+import at.flauschigesalex.animated_holo.lib.holo.animation.list.BobbingAnimation
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -14,9 +15,10 @@ import kotlin.jvm.javaClass
 @Suppress("unused")
 @Serializable(AnimationSerializer::class)
 abstract class HologramAnimation<AD: Any>(protected val defaultData: AD) {
-    
     companion object {
         val entries = mutableSetOf<HologramAnimation<*>>()
+        
+        var defaultAnimation: HologramAnimation<*>? = BobbingAnimation
     }
 
     private val savedData = mutableMapOf<HologramConfiguration, AD>()

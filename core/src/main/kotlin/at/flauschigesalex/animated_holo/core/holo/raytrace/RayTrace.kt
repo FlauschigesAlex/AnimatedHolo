@@ -4,10 +4,11 @@ import at.flauschigesalex.animated_holo.core.holo.Holograms
 import at.flauschigesalex.animated_holo.core.holo.isHoloDebug
 import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
 import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverOffsetAttribute
-import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverRangeMultiplierAttribute
+import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverInteractionRangeMultiplierAttribute
 import at.flauschigesalex.animated_holo.lib.holo.position.toLocation
-import at.flauschigesalex.animated_holo.lib.holo.animation.raytrace.RayTraceChangeEvent
-import at.flauschigesalex.animated_holo.lib.holo.animation.raytrace.RayTraceClickEvent
+import at.flauschigesalex.animated_holo.lib.holo.raytrace._events.RayTraceChangeEvent
+import at.flauschigesalex.animated_holo.lib.holo.raytrace._events.RayTraceClickEvent
+import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverMaxInteractionRangeAttribute
 import at.flauschigesalex.lib.minecraft.paper.base.internal.PaperListener
 import net.kyori.adventure.text.Component
 import org.bukkit.Particle
@@ -16,6 +17,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import java.util.*
+import kotlin.math.min
 
 @Suppress("unused")
 internal object RayTrace : PaperListener() {
@@ -52,11 +54,13 @@ internal object RayTrace : PaperListener() {
                 
                 val position = config.position.toLocation().add(0.0, offset.toDouble(), 0.0)
                 
-                if (position.distance(startLoc) > config.visibilityRange)
+                val maxRange = config.getAttribute(HoverMaxInteractionRangeAttribute::class.java)?.value ?: Int.MAX_VALUE
+                if (position.distance(startLoc) > min(config.visibilityRange, maxRange.toDouble()))
                     return@filter false
                 
-                val effectiveRange = range * (config.getAttribute(HoverRangeMultiplierAttribute::class.java)?.value ?: 1f)
-                return@filter effectiveRange >= position.distance(loc)
+                val effectiveRange = range * (config.getAttribute(HoverInteractionRangeMultiplierAttribute::class.java)?.value ?: 1f)
+                
+                return@filter effectiveRange.toFloat() >= position.distance(loc)
             }.minByOrNull { it.position.toLocation().distance(loc) }
             
             if (holo == null) continue

@@ -6,7 +6,7 @@
 
     <groupId>at.flauschigesalex.animated-holo</groupId>
     <artifactId>animated-holo-parent</artifactId>
-    <version>1.0.0-a.3</version>
+    <version>1.0.0-a.4</version>
     <packaging>pom</packaging>
     
     <modules>
