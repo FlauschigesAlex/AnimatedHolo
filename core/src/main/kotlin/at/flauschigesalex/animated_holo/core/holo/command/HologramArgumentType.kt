@@ -1,7 +1,7 @@
 package at.flauschigesalex.animated_holo.core.holo.command
 
 import at.flauschigesalex.animated_holo.core.holo.Holograms
-import at.flauschigesalex.animated_holo.lib.data.HologramConfiguration
+import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
 import at.flauschigesalex.lib.minecraft.brigadier.CommandArgumentType
 import net.kyori.adventure.audience.Audience
 

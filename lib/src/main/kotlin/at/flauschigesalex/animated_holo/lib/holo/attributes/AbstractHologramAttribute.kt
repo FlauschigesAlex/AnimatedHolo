@@ -1,4 +1,4 @@
-package at.flauschigesalex.animated_holo.lib.data.attributes
+package at.flauschigesalex.animated_holo.lib.holo.attributes
 
 import at.flauschigesalex.lib.base.file.json.JsonManager
 import at.flauschigesalex.lib.base.general.Reflector
@@ -7,13 +7,12 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlin.reflect.jvm.jvmName
 
 @Serializable(HologramAttributeSerializer::class)
 sealed interface HologramAttribute {
     companion object {
-        internal val DEFAULT_ATTRIBUTES = setOf(
-            HoverScaleAttribute(1.2f),
+        var DEFAULT_ATTRIBUTES = setOf(
+            HoverScaleAttribute(1.5f),
             HoverTransitionAttribute(3f),
         )
 
@@ -28,7 +27,7 @@ internal object HologramAttributeSerializer : KSerializer<HologramAttribute> {
 
     override fun serialize(encoder: Encoder, value: HologramAttribute) {
         val json = JsonManager(
-            "type" to value::class.jvmName,
+            "type" to value.javaClass.simpleName,
             "value" to value.value
         )
         encoder.encodeSerializableValue(JsonManager.serializer(), json)
@@ -38,9 +37,13 @@ internal object HologramAttributeSerializer : KSerializer<HologramAttribute> {
         val json = decoder.decodeSerializableValue(JsonManager.serializer())
 
         val typeRaw = json.getString("type")
-        val type = Class.forName(typeRaw)
+        val type = HologramAttribute.entries.find { it.simpleName == typeRaw }!!
+        
+        val constructor = type.getConstructor(Float::class.java)
+        constructor.isAccessible = true
+        
+        val value = json.getFloat("value")!!
 
-        val constructor = type.getConstructor(String::class.java)
-        return constructor.newInstance(json.getString("value")) as HologramAttribute
+        return constructor.newInstance(value) as HologramAttribute
     }
 }

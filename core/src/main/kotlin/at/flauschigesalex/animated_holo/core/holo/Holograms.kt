@@ -2,8 +2,8 @@ package at.flauschigesalex.animated_holo.core.holo
 
 import at.flauschigesalex.animated_holo.core.Configuration
 import at.flauschigesalex.animated_holo.core.holo.Holograms.entities
-import at.flauschigesalex.animated_holo.lib.data.HologramConfiguration
-import at.flauschigesalex.animated_holo.lib.data.position.toLocation
+import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
+import at.flauschigesalex.animated_holo.lib.holo.position.toLocation
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.TextDisplay
@@ -44,6 +44,8 @@ fun HologramConfiguration.asTextDisplay(forceTerminate: Boolean = false): TextDi
     
     textDisplay.alignment = textAlign
     textDisplay.isShadowed = textShadow
+    
+    textDisplay.interpolationDuration = 1
     
     textDisplay.isPersistent = false
     textDisplay.viewRange = (visibilityRange / 70.0).toFloat()

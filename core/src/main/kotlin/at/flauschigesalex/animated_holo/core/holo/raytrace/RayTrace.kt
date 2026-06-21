@@ -1,19 +1,17 @@
-package at.flauschigesalex.animated_holo.core.holo.animation.raytrace
+package at.flauschigesalex.animated_holo.core.holo.raytrace
 
 import at.flauschigesalex.animated_holo.core.holo.Holograms
 import at.flauschigesalex.animated_holo.core.holo.isHoloDebug
-import at.flauschigesalex.animated_holo.lib.data.HologramConfiguration
-import at.flauschigesalex.animated_holo.lib.data.attributes.HoverOffsetAttribute
-import at.flauschigesalex.animated_holo.lib.data.attributes.HoverRangeMultiplierAttribute
-import at.flauschigesalex.animated_holo.lib.data.position.toLocation
+import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
+import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverOffsetAttribute
+import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverRangeMultiplierAttribute
+import at.flauschigesalex.animated_holo.lib.holo.position.toLocation
 import at.flauschigesalex.animated_holo.lib.holo.animation.raytrace.RayTraceChangeEvent
 import at.flauschigesalex.animated_holo.lib.holo.animation.raytrace.RayTraceClickEvent
 import at.flauschigesalex.lib.minecraft.paper.base.internal.PaperListener
-import jdk.jshell.Snippet
 import net.kyori.adventure.text.Component
 import org.bukkit.Particle
 import org.bukkit.entity.Player
-import org.bukkit.entity.TextDisplay
 import org.bukkit.event.EventHandler
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent

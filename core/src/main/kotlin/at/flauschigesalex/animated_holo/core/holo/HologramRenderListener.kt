@@ -1,6 +1,6 @@
 package at.flauschigesalex.animated_holo.core.holo
 
-import at.flauschigesalex.animated_holo.lib.data.position.toLocation
+import at.flauschigesalex.animated_holo.lib.holo.position.toLocation
 import at.flauschigesalex.lib.minecraft.paper.base.internal.PaperListener
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler

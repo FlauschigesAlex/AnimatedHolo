@@ -2,7 +2,7 @@ package at.flauschigesalex.animated_holo.core
 
 import at.flauschigesalex.animated_holo.core.holo.asTextDisplay
 import at.flauschigesalex.animated_holo.core.utils.scheduleAsync
-import at.flauschigesalex.animated_holo.lib.data.HologramConfiguration
+import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
 import at.flauschigesalex.lib.base.file.FileManager
 import at.flauschigesalex.lib.base.file.json.JsonManager
 import at.flauschigesalex.lib.base.file.ResourceManager
@@ -24,8 +24,10 @@ internal object Configuration {
         this.json = file.readJson() ?: this.json
     }
 
+    // INTERNAL
+    
     @Deprecated("Internal")
-    internal val configVersion: Int = json.getInt("_version") ?: 1
+    internal val configVersion: Int get() = json.getInt("_version") ?: 1
     
     var dependencyMissingNoWarn: Set<String>
         get() = json.getStringList("warn.suppress.missing.dependencies").toSet()
@@ -33,6 +35,8 @@ internal object Configuration {
             json.put("warn.suppress.missing.dependencies", value.toList())
             this.saveConfig(true)
         }
+    
+    // HOLOGRAMS
     
     var holograms: Set<HologramConfiguration>
         get() = json.getJsonList("holograms").map {
@@ -49,6 +53,15 @@ internal object Configuration {
         
         holo.asTextDisplay(true)
     }
+    
+    // ANIMATIONS
+
+    var useAnimations: Boolean
+        get() = json.getBoolean("animations.enabled") ?: true
+        set(value) {
+            json.put("animations.enabled", value)
+            this.saveConfig(true)
+        }
     
     // SAVE CONFIG
     

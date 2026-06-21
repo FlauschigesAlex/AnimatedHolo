@@ -2,14 +2,16 @@ package at.flauschigesalex.animated_holo.core
 
 import at.flauschigesalex.animated_holo.core.holo.Holograms
 import at.flauschigesalex.animated_holo.core.holo.asTextDisplay
+import at.flauschigesalex.animated_holo.core.holo.command.HologramAnimationArgumentType
 import at.flauschigesalex.animated_holo.core.holo.command.HologramArgumentType
 import at.flauschigesalex.animated_holo.core.holo.command.HologramAttributeArgumentType
 import at.flauschigesalex.animated_holo.core.holo.isHoloDebug
 import at.flauschigesalex.animated_holo.core.holo.remove
-import at.flauschigesalex.animated_holo.lib.data.HologramConfiguration
-import at.flauschigesalex.animated_holo.lib.data.attributes.HologramAttribute
-import at.flauschigesalex.animated_holo.lib.data.position.toLocation
-import at.flauschigesalex.animated_holo.lib.data.position.toPosition
+import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
+import at.flauschigesalex.animated_holo.lib.holo.animation.HologramAnimation
+import at.flauschigesalex.animated_holo.lib.holo.attributes.HologramAttribute
+import at.flauschigesalex.animated_holo.lib.holo.position.toLocation
+import at.flauschigesalex.animated_holo.lib.holo.position.toPosition
 import at.flauschigesalex.animated_holo.lib.utils.BukkitColor
 import at.flauschigesalex.animated_holo.lib.utils.ColorArgumentType
 import at.flauschigesalex.lib.minecraft.brigadier.CommandBuilder
@@ -259,6 +261,28 @@ object CommandRegister {
                                     holo.setAttribute(instance)
                                     Configuration.updateHolo(holo)
                                 }
+                            }
+                        }
+                    }
+                    
+                    this.argument("animation", LiteralArgumentType.literal()) {
+                        this.argument("attribute", HologramAnimationArgumentType) {
+                            this.execute { context ->
+                                val sender = context.sender
+                                val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
+                                val animation = context.arguments.byType<HologramAnimation<*>>()?.value ?: return@execute
+
+                                holo.animation = animation
+                                Configuration.updateHolo(holo)
+                            }
+                        }
+                        this.argument("none", LiteralArgumentType.literal()) {
+                            this.execute { context ->
+                                val sender = context.sender
+                                val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
+
+                                holo.animation = null
+                                Configuration.updateHolo(holo)
                             }
                         }
                     }

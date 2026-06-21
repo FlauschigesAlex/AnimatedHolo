@@ -7,11 +7,11 @@
     <parent>
         <groupId>at.flauschigesalex.animated-holo</groupId>
         <artifactId>animated-holo-parent</artifactId>
-        <version>1.0.0-a.2</version>
+        <version>1.0.0-a.3</version>
     </parent>
     
     <artifactId>animated-holo-core</artifactId>
-    <name>AnimatedHolograms</name>
+    <name>AnimatedHolo</name>
     
     <dependencies>
         <dependency>
@@ -37,6 +37,10 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+    
+    <build>
+        <finalName>${project.name}</finalName>
+    </build>
 
     <profiles>
         <profile>

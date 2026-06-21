@@ -1,11 +1,11 @@
-package at.flauschigesalex.animated_holo.core.holo.animation
+package at.flauschigesalex.animated_holo.core.holo.raytrace
 
 import at.flauschigesalex.animated_holo.core.external_api.Dependency
 import at.flauschigesalex.animated_holo.core.external_api.DependencyCheck
 import at.flauschigesalex.animated_holo.core.holo.asTextDisplay
-import at.flauschigesalex.animated_holo.lib.data.HologramConfiguration
-import at.flauschigesalex.animated_holo.lib.data.attributes.HoverScaleAttribute
-import at.flauschigesalex.animated_holo.lib.data.attributes.HoverTransitionAttribute
+import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
+import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverScaleAttribute
+import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverTransitionAttribute
 import at.flauschigesalex.animated_holo.lib.holo.animation.raytrace.RayTraceChangeEvent
 import at.flauschigesalex.lib.minecraft.paper.base.internal.PaperListener
 import com.comphenix.protocol.PacketType

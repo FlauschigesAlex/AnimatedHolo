@@ -1,9 +1,9 @@
-package at.flauschigesalex.animated_holo.lib.data.attributes
+package at.flauschigesalex.animated_holo.lib.holo.attributes
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-class HoverScaleAttribute(
+class HoverOffsetAttribute(
     override val value: Float
 ) : HologramAttribute {
     companion object;

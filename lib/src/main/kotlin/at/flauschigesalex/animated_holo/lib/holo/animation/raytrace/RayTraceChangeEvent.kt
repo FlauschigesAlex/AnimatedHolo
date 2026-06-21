@@ -1,6 +1,6 @@
 package at.flauschigesalex.animated_holo.lib.holo.animation.raytrace
 
-import at.flauschigesalex.animated_holo.lib.data.HologramConfiguration
+import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 import org.bukkit.event.player.PlayerEvent

@@ -1,7 +1,8 @@
-package at.flauschigesalex.animated_holo.lib.data
+package at.flauschigesalex.animated_holo.lib.holo
 
-import at.flauschigesalex.animated_holo.lib.data.attributes.HologramAttribute
-import at.flauschigesalex.animated_holo.lib.data.position.Position
+import at.flauschigesalex.animated_holo.lib.holo.animation.HologramAnimation
+import at.flauschigesalex.animated_holo.lib.holo.attributes.HologramAttribute
+import at.flauschigesalex.animated_holo.lib.holo.position.Position
 import at.flauschigesalex.animated_holo.lib.utils.BukkitColor
 import kotlinx.serialization.Serializable
 import org.bukkit.entity.Display
@@ -13,6 +14,7 @@ data class HologramConfiguration(
     var position: Position,
     val richLines: MutableList<String> = mutableListOf(id),
 
+    var animation: HologramAnimation<*>? = null,
     private val attributes: MutableSet<HologramAttribute> = HologramAttribute.DEFAULT_ATTRIBUTES.toMutableSet(),
 
     var scale: Float = 1f,
