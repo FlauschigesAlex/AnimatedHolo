@@ -4,9 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class HoverTransitionAttribute(
-    override val value: String,
+    override val value: Float,
 ) : HologramAttribute {
     companion object;
-    
-    override fun isValid(): Boolean = value.toIntOrNull() != null
 }

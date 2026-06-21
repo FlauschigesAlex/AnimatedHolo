@@ -13,17 +13,14 @@ import kotlin.reflect.jvm.jvmName
 sealed interface HologramAttribute {
     companion object {
         internal val DEFAULT_ATTRIBUTES = setOf(
-            HoverScaleAttribute("1.2"),
-            HoverTransitionAttribute("3"),
+            HoverScaleAttribute(1.2f),
+            HoverTransitionAttribute(3f),
         )
 
         val entries: Set<Class<out HologramAttribute>> = Reflector.reflect(javaClass.classLoader, javaClass.packageName).getSubTypes(HologramAttribute::class.java).toSet()
     }
 
-    val value: String
-
-    fun isValid(): Boolean
-    fun isNotValid(): Boolean = this.isValid().not()
+    val value: Float
 }
 
 internal object HologramAttributeSerializer : KSerializer<HologramAttribute> {

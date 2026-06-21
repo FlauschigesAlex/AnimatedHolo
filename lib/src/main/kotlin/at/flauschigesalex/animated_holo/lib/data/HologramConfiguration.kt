@@ -16,7 +16,7 @@ data class HologramConfiguration(
     private val attributes: MutableSet<HologramAttribute> = HologramAttribute.DEFAULT_ATTRIBUTES.toMutableSet(),
 
     var scale: Float = 1f,
-    var visibilityRange: Double = 30.0,
+    var visibilityRange: Double = 50.0,
 
     var billboard: Display.Billboard = Display.Billboard.CENTER,
     var backgroundColor: BukkitColor? = null,

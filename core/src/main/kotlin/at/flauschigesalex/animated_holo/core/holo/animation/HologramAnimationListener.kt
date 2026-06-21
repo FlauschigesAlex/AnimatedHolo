@@ -30,7 +30,7 @@ private class HologramAnimationListener : PaperListener() {
                 player.spoofScale(it, it.scale, transition)
             }
             event.current?.also {
-                val multiplier = it.getAttribute(HoverScaleAttribute::class.java)?.value?.toFloat() ?: return@require
+                val multiplier = it.getAttribute(HoverScaleAttribute::class.java)?.value ?: return@require
                 val transition = it.getAttribute(HoverTransitionAttribute::class.java)?.value?.toInt() ?: 0
                 player.spoofScale(it, it.scale * multiplier, transition)
             }

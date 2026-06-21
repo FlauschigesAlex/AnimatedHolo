@@ -46,7 +46,7 @@ fun HologramConfiguration.asTextDisplay(forceTerminate: Boolean = false): TextDi
     textDisplay.isShadowed = textShadow
     
     textDisplay.isPersistent = false
-    textDisplay.viewRange = (visibilityRange / 64.0).toFloat()
+    textDisplay.viewRange = (visibilityRange / 70.0).toFloat()
     
     textDisplay.transformation = Transformation(
         Vector3f(),

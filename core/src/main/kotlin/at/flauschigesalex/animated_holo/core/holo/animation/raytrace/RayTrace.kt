@@ -1,10 +1,17 @@
 package at.flauschigesalex.animated_holo.core.holo.animation.raytrace
 
 import at.flauschigesalex.animated_holo.core.holo.Holograms
+import at.flauschigesalex.animated_holo.core.holo.isHoloDebug
 import at.flauschigesalex.animated_holo.lib.data.HologramConfiguration
+import at.flauschigesalex.animated_holo.lib.data.attributes.HoverOffsetAttribute
+import at.flauschigesalex.animated_holo.lib.data.attributes.HoverRangeMultiplierAttribute
+import at.flauschigesalex.animated_holo.lib.data.position.toLocation
 import at.flauschigesalex.animated_holo.lib.holo.animation.raytrace.RayTraceChangeEvent
 import at.flauschigesalex.animated_holo.lib.holo.animation.raytrace.RayTraceClickEvent
 import at.flauschigesalex.lib.minecraft.paper.base.internal.PaperListener
+import jdk.jshell.Snippet
+import net.kyori.adventure.text.Component
+import org.bukkit.Particle
 import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import org.bukkit.event.EventHandler
@@ -20,20 +27,55 @@ internal object RayTrace : PaperListener() {
     @EventHandler
     private fun onMove(event: PlayerMoveEvent) {
         val player = event.player
+
+        val lineOffset = .1f
         
-        val result = player.world.rayTraceEntities(player.eyeLocation, player.eyeLocation.direction, 100.0, 1.0) {
-            it is TextDisplay && Holograms.entities.values.contains(it)
+        val nearbyRangeDistanceBase = 1.1
+        val nearbyRangeDistanceMultiplier = .02
+        
+        val maxRayTraceDistance = 100
+        val spacingMultiplierBase = 1.4
+        var spacingMultiplier = spacingMultiplierBase
+
+        val startLoc = player.eyeLocation
+        while (true) {
+            val t = startLoc.toVector().add(startLoc.direction.multiply(spacingMultiplier))
+            val loc = t.toLocation(player.world)
+            if (loc.distance(startLoc) > maxRayTraceDistance) break
+
+            spacingMultiplier += spacingMultiplierBase
+            
+            if (player.isHoloDebug) loc.world.spawnParticle(Particle.CRIT, loc, 1, 0.0, 0.0, 0.0, 0.0, null)
+            
+            val range = nearbyRangeDistanceBase + (startLoc.distance(loc) * nearbyRangeDistanceMultiplier)
+            val holo = Holograms.filter { config ->
+                var offset = config.getAttribute(HoverOffsetAttribute::class.java)?.value ?: 0f
+                offset += (lineOffset * config.richLines.size)
+                
+                val position = config.position.toLocation().add(0.0, offset.toDouble(), 0.0)
+                
+                if (position.distance(startLoc) > config.visibilityRange)
+                    return@filter false
+                
+                val effectiveRange = range * (config.getAttribute(HoverRangeMultiplierAttribute::class.java)?.value ?: 1f)
+                return@filter effectiveRange >= position.distance(loc)
+            }.minByOrNull { it.position.toLocation().distance(loc) }
+            
+            if (holo == null) continue
+            
+            if (player.isHoloDebug) player.sendActionBar(Component.text(holo.id))
+            
+            val previous = tracing.put(player.uniqueId, holo)
+            if (previous == holo) return
+            
+            RayTraceChangeEvent(player, previous, holo).callEvent()
+            return
         }
-        val entity = result?.hitEntity
-        val holo = Holograms.entities.toList().find { it.second == entity }?.first
 
-        val previous = tracing[player.uniqueId]
-        if (previous == holo) return
+        if (player.isHoloDebug) player.sendActionBar(Component.text("null"))
 
-        if (holo == null) tracing.remove(player.uniqueId)
-        else tracing[player.uniqueId] = holo
-        
-        RayTraceChangeEvent(player, previous, holo).callEvent()
+        val previous = tracing.remove(player.uniqueId) ?: return
+        RayTraceChangeEvent(player, previous, null).callEvent()
     }
     
     @EventHandler

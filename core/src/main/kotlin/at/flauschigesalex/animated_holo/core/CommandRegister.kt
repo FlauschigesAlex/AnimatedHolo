@@ -4,6 +4,7 @@ import at.flauschigesalex.animated_holo.core.holo.Holograms
 import at.flauschigesalex.animated_holo.core.holo.asTextDisplay
 import at.flauschigesalex.animated_holo.core.holo.command.HologramArgumentType
 import at.flauschigesalex.animated_holo.core.holo.command.HologramAttributeArgumentType
+import at.flauschigesalex.animated_holo.core.holo.isHoloDebug
 import at.flauschigesalex.animated_holo.core.holo.remove
 import at.flauschigesalex.animated_holo.lib.data.HologramConfiguration
 import at.flauschigesalex.animated_holo.lib.data.attributes.HologramAttribute
@@ -11,7 +12,6 @@ import at.flauschigesalex.animated_holo.lib.data.position.toLocation
 import at.flauschigesalex.animated_holo.lib.data.position.toPosition
 import at.flauschigesalex.animated_holo.lib.utils.BukkitColor
 import at.flauschigesalex.animated_holo.lib.utils.ColorArgumentType
-import at.flauschigesalex.lib.base.file.json.JsonManager
 import at.flauschigesalex.lib.minecraft.brigadier.CommandBuilder
 import at.flauschigesalex.lib.minecraft.brigadier.types.internal.GreedyArgumentType
 import at.flauschigesalex.lib.minecraft.brigadier.types.internal.LiteralArgumentType
@@ -24,7 +24,6 @@ import at.flauschigesalex.lib.minecraft.brigadier.types.primitive.number.Integer
 import org.bukkit.entity.Display
 import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
-import java.lang.foreign.ValueLayout
 
 object CommandRegister {
     init {
@@ -245,22 +244,17 @@ object CommandRegister {
                     
                     this.argument("attribute", LiteralArgumentType.literal()) {
                         this.argument("attribute", HologramAttributeArgumentType) {
-                            this.argument("value", StringArgumentType.string()) {
+                            this.argument("value", FloatArgumentType.positive()) {
                                 this.execute { context ->
                                     val sender = context.sender
                                     val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
                                     val attributeClass = context.arguments.byType<Class<out HologramAttribute>>()?.value ?: return@execute
-                                    val value = context.arguments.byType<String>()?.value ?: return@execute
+                                    val value = context.arguments.byType<Float>()?.value ?: return@execute
                                     
-                                    val constructor = attributeClass.declaredConstructors.first()
-                                    val parameter = constructor.parameterTypes.first()
-                                    
+                                    val constructor = attributeClass.getDeclaredConstructor(Float::class.java)
                                     constructor.isAccessible = true
 
-                                    val instance = constructor.newInstance(parameter.cast(value)) as HologramAttribute
-                                    if (instance.isNotValid()) {
-                                        return@execute
-                                    }
+                                    val instance = constructor.newInstance(value) as HologramAttribute
                                     
                                     holo.setAttribute(instance)
                                     Configuration.updateHolo(holo)
@@ -280,6 +274,13 @@ object CommandRegister {
                         Configuration.holograms -= holo
                         holo.remove()
                     }
+                }
+            }
+            
+            this.argument("debug", LiteralArgumentType.literal()) {
+                this.execute { context ->
+                    val sender = context.sender as? Player ?: return@execute
+                    sender.isHoloDebug = !sender.isHoloDebug
                 }
             }
         }
