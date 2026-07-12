@@ -49,6 +49,8 @@ internal object RayTrace : PaperListener() {
             
             val range = nearbyRangeDistanceBase + (startLoc.distance(loc) * nearbyRangeDistanceMultiplier)
             val holo = Holograms.filter { config ->
+                if (config.visible.not()) return@filter false
+                
                 var offset = config.getAttribute(HoverOffsetAttribute::class.java)?.value ?: 0f
                 offset += (lineOffset * config.richLines.size)
                 

@@ -19,6 +19,7 @@ data class HologramConfiguration(
 
     var scale: Float = 1f,
     var visibilityRange: Double = 50.0,
+    var visible: Boolean = true,
 
     var billboard: Display.Billboard = Display.Billboard.CENTER,
     var backgroundColor: BukkitColor? = null,

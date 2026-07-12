@@ -10,6 +10,7 @@ import org.bukkit.entity.TextDisplay
 import org.bukkit.util.Transformation
 import org.joml.AxisAngle4f
 import org.joml.Vector3f
+import kotlin.collections.joinToString
 
 object Holograms : Iterable<HologramConfiguration> {
     val entities = mutableMapOf<HologramConfiguration, TextDisplay>()
@@ -23,6 +24,12 @@ object Holograms : Iterable<HologramConfiguration> {
         holo.asTextDisplay()
     }
 }
+
+internal val HologramConfiguration.richText: String
+    get() = this.richLines.joinToString("<newline><reset>").validate(this)
+
+val HologramConfiguration.textDisplayOrNull: TextDisplay?
+    get() = entities[this]
 
 fun HologramConfiguration.asTextDisplay(forceTerminate: Boolean = false): TextDisplay {
     var entity = entities[this]
@@ -38,7 +45,8 @@ fun HologramConfiguration.asTextDisplay(forceTerminate: Boolean = false): TextDi
     val location = position.toLocation()
 
     val textDisplay = location.world.spawnEntity(location, EntityType.TEXT_DISPLAY) as TextDisplay
-    textDisplay.text(MiniMessage.miniMessage().deserialize(richLines.joinToString("<newline><reset>").validate()))
+    
+    textDisplay.text(MiniMessage.miniMessage().deserialize(richText))
     textDisplay.billboard = billboard
     textDisplay.backgroundColor = backgroundColor
     
@@ -48,7 +56,7 @@ fun HologramConfiguration.asTextDisplay(forceTerminate: Boolean = false): TextDi
     textDisplay.interpolationDuration = 1
     
     textDisplay.isPersistent = false
-    textDisplay.viewRange = (visibilityRange / 70.0).toFloat()
+    textDisplay.viewRange = if (visible.not()) 0f else (visibilityRange / 70.0).toFloat()
     
     textDisplay.transformation = Transformation(
         Vector3f(),
@@ -66,4 +74,8 @@ fun HologramConfiguration.remove() {
     entities -= this
 }
 
-fun String.validate() = this.replace("\n", "<newline>")
+fun String.validate(config: HologramConfiguration) = this.replace("\n", "<newline>").let { 
+    if (it.isBlank() || MiniMessage.miniMessage().escapeTags(it).isBlank())
+        return@let config.id
+    else return@let it
+}

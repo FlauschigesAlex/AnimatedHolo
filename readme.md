@@ -78,13 +78,6 @@ AnimatedHolo uses a configuration file to store holograms and global options.
   "animations": {
     "enabled": true
   },
-  "warn": {
-    "suppress": {
-      "missing": {
-        "dependencies": []
-      }
-    }
-  },
   "holograms": [
     {
       "id": "example",
@@ -101,6 +94,7 @@ AnimatedHolo uses a configuration file to store holograms and global options.
       ],
       "scale": 1.0,
       "visibilityRange": 50.0,
+      "visible": true,
       "billboard": "CENTER",
       "backgroundColor": null,
       "textAlign": "CENTER",

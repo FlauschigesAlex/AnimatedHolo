@@ -28,10 +28,10 @@ class AnimatedHoloPluginLoader implements PluginLoader {
         resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlin:kotlin-stdlib:2.3.21"), null));
         resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0"), null));
         
-        resolver.addDependency(new Dependency(new DefaultArtifact("at.flauschigesalex.lib.base:default-general:2.3.1"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("at.flauschigesalex.lib.base:default-file:3.0.0"), null));
+        resolver.addDependency(new Dependency(new DefaultArtifact("at.flauschigesalex.lib.base:default-general:2.4.1"), null));
+        resolver.addDependency(new Dependency(new DefaultArtifact("at.flauschigesalex.lib.base:default-file:3.1.0"), null));
         resolver.addDependency(new Dependency(new DefaultArtifact("at.flauschigesalex.lib.minecraft.paper:minecraft-paper-base:3.1.0"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("at.flauschigesalex.rinth:modrinth-api:1.1.1"), null));
+        resolver.addDependency(new Dependency(new DefaultArtifact("at.flauschigesalex.rinth:modrinth-version-api:1.0.0"), null));
         
         resolver.addRepository(paperRepo);
         resolver.addRepository(flxRepo);

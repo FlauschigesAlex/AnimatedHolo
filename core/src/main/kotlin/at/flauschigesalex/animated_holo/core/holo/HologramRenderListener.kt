@@ -43,7 +43,7 @@ private class HologramRenderListener : PaperListener() {
     }
     
     fun Player.updateNearbyHolograms() {
-        Holograms.filter { it.position.name == this.world.name }.filter {
+        Holograms.filter { it.position.name == this.world.name && it.visible }.filter {
             it.position.toLocation().distance(this.location) < it.visibilityRange
         }.forEach(Holograms::updateHologram)
     }

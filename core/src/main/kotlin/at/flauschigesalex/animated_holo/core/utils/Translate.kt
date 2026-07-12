@@ -25,16 +25,21 @@ internal object Translate {
 val Audience.locale: Locale
     get() = (this as? Player)?.locale() ?: Locale.getDefault()
 
-fun Audience.getTranslated(key: String, vararg args: Any?, prefix: Boolean = false, richConsumer: Audience.(String) -> String = { it }): Component {
+fun Audience.getTranslated(key: String, vararg args: Any?, prefix: Boolean = true, richConsumer: Audience.(String) -> String = { it }): Component {
     val translation = Translate.translate(key, this.locale)
     val richTranslation = richConsumer.invoke(this, translation)
     
-    val prefix = if (prefix) "<dark_gray>› <gray>" else "<gray>"
+    val (color1, color2) = Colors.gradient
+    val prefix = if (prefix) "<gradient:${color1.asHexString()}:${color2.asHexString()}>AnimatedHolo</gradient> <dark_gray>› <gray>" else "<gray>"
     val formatted = richTranslation.format(*args)
     
     return MiniMessage.miniMessage().deserialize("${prefix}${formatted}")
 }
 
-fun Audience.sendTranslated(key: String, vararg args: Any?, richConsumer: Audience.(String) -> String = { it }) {
-    this.sendMessage(this.getTranslated(key, *args, true, richConsumer))
+fun Audience.sendTranslated(key: String, vararg args: Any?, prefix: Boolean = true, richConsumer: Audience.(String) -> String = { it }) {
+    this.sendMessage(this.getTranslated(key, *args, prefix = prefix, richConsumer = richConsumer))
+}
+
+internal fun Audience.sendConsoleDenied() = this.sendTranslated("command.console-denied") {
+    "<red>$it"
 }

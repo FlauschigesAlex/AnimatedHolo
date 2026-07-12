@@ -2,7 +2,7 @@ package at.flauschigesalex.animated_holo.core.holo.raytrace
 
 import at.flauschigesalex.animated_holo.core.external_api.Dependency
 import at.flauschigesalex.animated_holo.core.external_api.DependencyCheck
-import at.flauschigesalex.animated_holo.core.holo.asTextDisplay
+import at.flauschigesalex.animated_holo.core.holo.textDisplayOrNull
 import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
 import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverScaleAttribute
 import at.flauschigesalex.animated_holo.lib.holo.attributes.HoverTransitionAttribute
@@ -38,7 +38,7 @@ private class HologramAnimationListener : PaperListener() {
     }
     
     private fun Player.spoofScale(holo: HologramConfiguration, scale: Float, delayTicks: Int = 0) {
-        val entity = holo.asTextDisplay()
+        val entity = holo.textDisplayOrNull ?: return
         
         val protocolManager = ProtocolLibrary.getProtocolManager()
         val watcher = WrappedDataWatcher.getEntityWatcher(entity)

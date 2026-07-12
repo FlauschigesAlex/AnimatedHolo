@@ -20,7 +20,7 @@ internal object Configuration {
         this.json = file.readJson() ?: JsonManager()
     }
     
-    internal fun reload() {
+    internal fun reloadConfig() {
         this.json = file.readJson() ?: this.json
     }
 

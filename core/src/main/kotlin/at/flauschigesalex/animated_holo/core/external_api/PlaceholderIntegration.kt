@@ -15,6 +15,7 @@ import net.kyori.adventure.text.serializer.json.JSONComponentSerializer
 import org.bukkit.entity.TextDisplay
 
 import at.flauschigesalex.animated_holo.core.external_api.Dependency.*
+import at.flauschigesalex.animated_holo.core.holo.richText
 
 class PlaceholderIntegration private constructor(plugin: AnimatedHoloPlugin) {
     
@@ -35,7 +36,7 @@ class PlaceholderIntegration private constructor(plugin: AnimatedHoloPlugin) {
                 val holo = Holograms.entities.toList().find { it.second == entity }?.first ?: return
                 if (entity !is TextDisplay) return
                 
-                val text = holo.richLines.joinToString("<newline><reset>")
+                val text = holo.richText
                 val component = MiniMessage.miniMessage().deserialize(PlaceholderAPI.setPlaceholders(player, text))
                 val serialized = JSONComponentSerializer.json().serialize(component)
 

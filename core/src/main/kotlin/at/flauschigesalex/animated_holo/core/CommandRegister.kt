@@ -7,6 +7,12 @@ import at.flauschigesalex.animated_holo.core.holo.command.HologramArgumentType
 import at.flauschigesalex.animated_holo.core.holo.command.HologramAttributeArgumentType
 import at.flauschigesalex.animated_holo.core.holo.isHoloDebug
 import at.flauschigesalex.animated_holo.core.holo.remove
+import at.flauschigesalex.animated_holo.core.utils.Colors
+import at.flauschigesalex.animated_holo.core.utils.Translate
+import at.flauschigesalex.animated_holo.core.utils.sendConsoleDenied
+import at.flauschigesalex.animated_holo.core.utils.sendTranslated
+import at.flauschigesalex.animated_holo.core.utils.asRichString
+import at.flauschigesalex.animated_holo.core.utils.locale
 import at.flauschigesalex.animated_holo.lib.holo.HologramConfiguration
 import at.flauschigesalex.animated_holo.lib.holo.animation.HologramAnimation
 import at.flauschigesalex.animated_holo.lib.holo.attributes.HologramAttribute
@@ -23,6 +29,7 @@ import at.flauschigesalex.lib.minecraft.brigadier.types.primitive.StringArgument
 import at.flauschigesalex.lib.minecraft.brigadier.types.primitive.number.DoubleArgumentType
 import at.flauschigesalex.lib.minecraft.brigadier.types.primitive.number.FloatArgumentType
 import at.flauschigesalex.lib.minecraft.brigadier.types.primitive.number.IntegerArgumentType
+import net.kyori.adventure.text.format.TextColor
 import org.bukkit.entity.Display
 import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
@@ -35,34 +42,84 @@ object CommandRegister {
             
             this.argument("create", LiteralArgumentType.literal()) {
                 this.argument("name", StringArgumentType.string()) {
+                    this.suggestions { _ ->
+                        var number: Int? = null
+                        
+                        while (true) {
+                            val holograms = Holograms
+                            number = (number ?: holograms.count())
+                            
+                            val suggestedName = "animatedholo-${number}"
+                            val names = holograms.map { it.id }
+                            
+                            if (names.any { it.equals(suggestedName, true) }) continue
+
+                            return@suggestions setOf(suggestedName)
+                        }
+                        
+                        return@suggestions setOf()
+                    }
                     
                     this.execute { context ->
-                        val sender = context.sender as? Player ?: return@execute // TODO
+                        val sender = context.sender as? Player ?: return@execute context.sender.sendConsoleDenied()
                         val name = context.arguments.byType<String>()?.value ?: return@execute
 
-                        val holo = HologramConfiguration(name, sender.location.clone().let { 
-                            it.yaw = 0f
-                            it.pitch = 0f
-                            it.toPosition()
-                        })
-                        Configuration.holograms += holo
-                        val entity = holo.asTextDisplay()
+                        if (Holograms.any { it.id.equals(name, true) }) {
+                            sender.sendTranslated("hologram.create.failure.uniqueId", "${Colors.errorHighlight.asRichString()}$name</color>") {
+                                "${Colors.error.asRichString()}${it}"
+                            }
+                            return@execute
+                        }
+                        
+                        runCatching {
+                            val holo = HologramConfiguration(name, sender.location.clone().let {
+                                it.yaw = 0f
+                                it.pitch = 0f
+                                it.toPosition()
+                            })
+                            
+                            Configuration.holograms += holo
+                            holo.asTextDisplay()
+                            
+                            sender.sendTranslated("hologram.create",
+                                "${Colors.highlight.asRichString()}${holo.id}</color>"
+                            )
+                            
+                        }.onFailure { error ->
+                            sender.sendTranslated("hologram.create.failure.unknown") {
+                                "${Colors.error.asRichString()}${it}"
+                            }
+                            error.printStackTrace()
+                        }
                     }
                 }
             }
             
             this.argument("near", LiteralArgumentType.literal().alias("list")) {
                 this.argument("distance", IntegerArgumentType.positive()) {
+                    this.suggestions(setOf("10", "30", "50", "90"))
                     this.optional()
                     
                     this.execute { context ->
-                        val sender = context.sender as? Player ?: return@execute
+                        val sender = context.sender as? Player ?: return@execute context.sender.sendConsoleDenied()
                         val distance = context.arguments.byType<Int>()?.value ?: 20
                         
                         val holograms = Holograms.toMutableList()
                         holograms.removeIf { it.position.toLocation().distance(sender.location) > distance }
                         
-                        sender.sendMessage("Found ${holograms.size} holograms within ${distance} blocks")
+                        val key = when (holograms.size) {
+                            0 -> "hologram.near.none"
+                            1 -> "hologram.near.single"
+                            else -> "hologram.near.multiple"
+                        }
+                        
+                        fun HologramConfiguration.toRichDisplay(): String {
+                            return this.id
+                        }
+                        
+                        sender.sendTranslated(key, "${Colors.highlight.asRichString()}${holograms.size}</color>", "${Colors.highlight.asRichString()}${distance}</color>") { text ->
+                            text + holograms.joinToString { "<newline><reset> <dark_gray>› ${Colors.highlight.asRichString()}${it.toRichDisplay()}</color>" }
+                        }
                     }
                 }
             }
@@ -70,11 +127,13 @@ object CommandRegister {
             this.argument("move", LiteralArgumentType.literal()) {
                 this.argument("hologram", HologramArgumentType) {
                     this.execute { context ->
-                        val sender = context.sender as? Player ?: return@execute
+                        val sender = context.sender as? Player ?: return@execute context.sender.sendConsoleDenied()
                         val hologram = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
                     
                         hologram.position = sender.location.toPosition()  
                         Configuration.updateHolo(hologram)
+                        
+                        sender.sendTranslated("hologram.move", "${Colors.highlight.asRichString()}${hologram.id}</color>")
                     }
                 }
             }
@@ -82,10 +141,11 @@ object CommandRegister {
             this.argument("tp", LiteralArgumentType.literal()) {
                 this.argument("hologram", HologramArgumentType) {
                     this.execute { context ->
-                        val sender = context.sender as? Player ?: return@execute
+                        val sender = context.sender as? Player ?: return@execute context.sender.sendConsoleDenied()
                         val hologram = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
                     
                         sender.teleport(hologram.position.toLocation())
+                        sender.sendTranslated("hologram.teleport", "${Colors.highlight.asRichString()}${hologram.id}</color>")
                     }
                 }
             }
@@ -95,6 +155,13 @@ object CommandRegister {
                     this.argument("text", LiteralArgumentType.literal()) {
                         this.argument("addline", LiteralArgumentType.literal()) {
                             this.argument("lineNum", IntegerArgumentType.range(0, Int.MAX_VALUE)) {
+                                this.suggestions { context ->
+                                    val holo = context.arguments.byType<HologramConfiguration>()?.value
+                                        ?: return@suggestions emptySet()
+                                    val lines = holo.richLines.size
+
+                                    return@suggestions (0 .. lines).map { it.toString() }.toSet()
+                                }
                                 this.optional()
                                 
                                 this.argument("text", GreedyArgumentType.greedy(StringArgumentType.string())) {
@@ -103,15 +170,31 @@ object CommandRegister {
                                         val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
                                         val lineNum = context.arguments.byType<Int>()?.value
                                         val line = context.arguments.greedyByType<String>()?.value?.joinToString(" ") ?: return@execute
+                                        
+                                        val lastLine = holo.richLines.size
 
-                                        if (lineNum == null) {
+                                        if (lineNum !in 0..lastLine) {
+                                            sender.sendTranslated(
+                                                "hologram.edit.text.line.failure.bounds",
+                                                "${Colors.errorHighlight.asRichString()}$lineNum</color>",
+                                                lastLine
+                                            ) {
+                                                "${Colors.error.asRichString()}$it"
+                                            }
+                                            return@execute
+                                        }
+
+                                        if (lineNum == null || lineNum == lastLine) {
                                             holo.richLines.addLast(line)
                                             Configuration.updateHolo(holo)
+                                            sender.sendTranslated("hologram.edit.text.line.add", "${Colors.highlight.asRichString()}${holo.id}</color>", "${Colors.highlight.asRichString()}${lastLine}</color>")
                                             return@execute
                                         }
                                         
                                         holo.richLines.add(lineNum, line)
                                         Configuration.updateHolo(holo)
+
+                                        sender.sendTranslated("hologram.edit.text.line.add", "${Colors.highlight.asRichString()}${holo.id}</color>", "${Colors.highlight.asRichString()}${lineNum}</color>")
                                     }
                                 }
                             }
@@ -119,6 +202,14 @@ object CommandRegister {
                         
                         this.argument("editline", LiteralArgumentType.literal().alias("setline")) {
                             this.argument("lineNum", IntegerArgumentType.range(0, Int.MAX_VALUE)) {
+                                this.suggestions { context ->
+                                    val holo = context.arguments.byType<HologramConfiguration>()?.value
+                                        ?: return@suggestions emptySet()
+                                    val lines = holo.richLines.size
+
+                                    return@suggestions (0 ..< lines).map { it.toString() }.toSet()
+                                }
+                                
                                 this.argument("text", GreedyArgumentType.greedy(StringArgumentType.string())) {
                                     this.execute { context ->
                                         val sender = context.sender
@@ -126,8 +217,24 @@ object CommandRegister {
                                         val lineNum = context.arguments.byType<Int>()?.value ?: return@execute
                                         val line = context.arguments.greedyByType<String>()?.value?.joinToString(" ") ?: return@execute
                                         
+                                        if (lineNum !in holo.richLines.indices) {
+                                            sender.sendTranslated(
+                                                "hologram.edit.text.line.failure.bounds",
+                                                "${Colors.errorHighlight.asRichString()}$lineNum</color>",
+                                                holo.richLines.size - 1
+                                            ) {
+                                                "${Colors.error.asRichString()}$it"
+                                            }
+                                            return@execute
+                                        }
+
                                         holo.richLines[lineNum] = line
                                         Configuration.updateHolo(holo)
+
+                                        return@execute sender.sendTranslated("hologram.edit.text.line.edit",
+                                            "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                            "${Colors.highlight.asRichString()}${lineNum}</color>"
+                                        )
                                     }
                                 }
                             }
@@ -135,24 +242,52 @@ object CommandRegister {
                         
                         this.argument("removeline", LiteralArgumentType.literal().alias("deleteline")) {
                             this.argument("lineNum", IntegerArgumentType.range(0, Int.MAX_VALUE)) {
+                                this.suggestions { context ->
+                                    val holo = context.arguments.byType<HologramConfiguration>()?.value
+                                        ?: return@suggestions emptySet()
+                                    val lines = holo.richLines.size
+
+                                    return@suggestions (0 ..< lines).map { it.toString() }.toSet()
+                                }
+                                
                                 this.execute { context ->
                                     val sender = context.sender
                                     val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
                                     val lineNum = context.arguments.byType<Int>()?.value ?: return@execute
+
+                                    if (lineNum !in holo.richLines.indices) {
+                                        sender.sendTranslated(
+                                            "hologram.edit.text.line.failure.bounds",
+                                            "${Colors.errorHighlight.asRichString()}$lineNum</color>",
+                                            holo.richLines.size - 1
+                                        ) {
+                                            "${Colors.error.asRichString()}$it"
+                                        }
+                                        return@execute
+                                    }
                                     
                                     holo.richLines.removeAt(lineNum)
                                     Configuration.updateHolo(holo)
+
+                                    return@execute sender.sendTranslated("hologram.edit.text.line.remove",
+                                        "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                        "${Colors.highlight.asRichString()}${lineNum}</color>"
+                                    )
                                 }
                             }
                         }
                         
-                        this.argument("clear", LiteralArgumentType.literal()) {
+                        this.argument("reset", LiteralArgumentType.literal()) {
                             this.execute { context ->
                                 val sender = context.sender
                                 val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
                                 
                                 holo.richLines.clear()
                                 Configuration.updateHolo(holo)
+                                
+                                return@execute sender.sendTranslated("hologram.edit.text.line.reset",
+                                    "${Colors.highlight.asRichString()}${holo.id}</color>"
+                                )
                             }
                         }
                     }
@@ -166,6 +301,12 @@ object CommandRegister {
                                 
                                 holo.billboard = billboard
                                 Configuration.updateHolo(holo)
+
+                                val insert = Translate.translate("hologram.edit.billboard.${billboard}", sender.locale)
+                                return@execute sender.sendTranslated("hologram.edit.billboard",
+                                    "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                    "${Colors.highlight.asRichString()}${insert}</color>"
+                                )
                             }
                         }
                     }
@@ -179,6 +320,11 @@ object CommandRegister {
 
                                 holo.scale = scale
                                 Configuration.updateHolo(holo)
+
+                                return@execute sender.sendTranslated("hologram.edit.scale",
+                                    "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                    "${Colors.highlight.asRichString()}${scale}</color>"
+                                )
                             }
                         }
                     }
@@ -192,9 +338,16 @@ object CommandRegister {
 
                                 holo.textAlign = alignment
                                 Configuration.updateHolo(holo)
+
+                                val insert = Translate.translate("hologram.edit.text_alignment.${alignment}", sender.locale)
+                                return@execute sender.sendTranslated("hologram.edit.text_alignment",
+                                    "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                    "${Colors.highlight.asRichString()}${insert}</color>"
+                                )
                             }
                         }
                     }
+                    
                     this.argument("textShadow", LiteralArgumentType.literal()) {
                         this.argument("textShadow", BooleanArgumentType.bool()) {
                             this.execute { context ->
@@ -204,19 +357,34 @@ object CommandRegister {
                                 
                                 holo.textShadow = state
                                 Configuration.updateHolo(holo)
+                                
+                                val insert = Translate.translate("hologram.edit.text_shadow.${state}", sender.locale)
+                                return@execute sender.sendTranslated("hologram.edit.text_shadow",
+                                    "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                    "${Colors.highlight.asRichString()}${insert}</color>"
+                                )
                             }
                         }
                     }
                     
                     this.argument("backgroundColor", LiteralArgumentType.literal()) {
                         this.argument("backgroundColor", ColorArgumentType) {
+                            this.suggestions(setOf(
+                                "blue", "#fff", "#bb0033", "#660033AA", "-22016"
+                            ))
+                            
                             this.execute { context ->
                                 val sender = context.sender
                                 val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
-                                val color = context.arguments.byType<BukkitColor>()?.value
+                                val color = context.arguments.byType<BukkitColor>()?.value ?: return@execute
                                 
                                 holo.backgroundColor = color
                                 Configuration.updateHolo(holo)
+                                
+                                return@execute sender.sendTranslated("hologram.edit.background_color",
+                                    "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                    "${TextColor.color(color.red, color.green, color.blue).asRichString()}${color.asRGB()}</color>"
+                                )
                             }
                         }
                         
@@ -227,12 +395,20 @@ object CommandRegister {
                                 
                                 holo.backgroundColor = null
                                 Configuration.updateHolo(holo)
+
+                                return@execute sender.sendTranslated("hologram.edit.background_color.reset",
+                                    "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                )
                             }
                         }
                     }
                     
                     this.argument("visibilityRange", LiteralArgumentType.literal()) {
-                        this.argument("range", DoubleArgumentType.positive()) {
+                        this.argument("range", DoubleArgumentType.range(1.0, Double.MAX_VALUE)) {
+                            this.suggestions(setOf(
+                                "20", "50", "100"
+                            ))
+                            
                             this.execute { context ->
                                 val sender = context.sender
                                 val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
@@ -240,6 +416,30 @@ object CommandRegister {
                                 
                                 holo.visibilityRange = range
                                 Configuration.updateHolo(holo)
+
+                                return@execute sender.sendTranslated("hologram.edit.scale",
+                                    "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                    "${Colors.highlight.asRichString()}~${range}</color>"
+                                )
+                            }
+                        }
+                    }
+                    
+                    this.argument("visibility", LiteralArgumentType.literal()) {
+                        this.argument("state", BooleanArgumentType.bool()) {
+                            this.execute { context ->
+                                val sender = context.sender
+                                val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
+                                val state = context.arguments.byType<Boolean>()?.value ?: return@execute
+                                
+                                holo.visible = state
+                                Configuration.updateHolo(holo)
+
+                                val insert = Translate.translate("hologram.edit.visibility.${state}", sender.locale)
+                                return@execute sender.sendTranslated("hologram.edit.visibility",
+                                    "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                    "${Colors.highlight.asRichString()}${insert}</color>"
+                                )
                             }
                         }
                     }
@@ -261,6 +461,7 @@ object CommandRegister {
                                     
                                     return@suggestions setOf("1.0")
                                 }
+                                
                                 this.execute { context ->
                                     val sender = context.sender
                                     val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
@@ -274,6 +475,12 @@ object CommandRegister {
                                     
                                     holo.setAttribute(instance)
                                     Configuration.updateHolo(holo)
+
+                                    return@execute sender.sendTranslated("hologram.edit.attribute",
+                                        "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                        "${Colors.highlight.asRichString()}${attributeClass.simpleName}</color>",
+                                        "${Colors.highlight.asRichString()}${value}</color>",
+                                    )
                                 }
                             }
                             this.argument("reset", LiteralArgumentType.literal()) {
@@ -290,13 +497,18 @@ object CommandRegister {
                                     else holo.removeAttribute(attributeClass)
                                     
                                     Configuration.updateHolo(holo)
+
+                                    return@execute sender.sendTranslated("hologram.edit.attribute.reset",
+                                        "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                        "${Colors.highlight.asRichString()}${attributeClass.simpleName}</color>"
+                                    )
                                 }
                             }
                         }
                     }
                     
                     this.argument("animation", LiteralArgumentType.literal()) {
-                        this.argument("attribute", HologramAnimationArgumentType) {
+                        this.argument("name", HologramAnimationArgumentType) {
                             this.execute { context ->
                                 val sender = context.sender
                                 val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
@@ -304,8 +516,14 @@ object CommandRegister {
 
                                 holo.animation = animation
                                 Configuration.updateHolo(holo)
+
+                                return@execute sender.sendTranslated("hologram.edit.animation",
+                                    "${Colors.highlight.asRichString()}${holo.id}</color>",
+                                    "${Colors.highlight.asRichString()}${animation::class.simpleName}</color>"
+                                )
                             }
                         }
+                        
                         this.argument("none", LiteralArgumentType.literal()) {
                             this.execute { context ->
                                 val sender = context.sender
@@ -313,6 +531,10 @@ object CommandRegister {
 
                                 holo.animation = null
                                 Configuration.updateHolo(holo)
+
+                                return@execute sender.sendTranslated("hologram.edit.animation.none",
+                                    "${Colors.highlight.asRichString()}${holo.id}</color>"
+                                )
                             }
                         }
                     }
@@ -327,6 +549,10 @@ object CommandRegister {
                         
                         Configuration.holograms -= holo
                         holo.remove()
+
+                        sender.sendTranslated("hologram.delete",
+                            "${Colors.highlight.asRichString()}${holo.id}</color>"
+                        )
                     }
                 }
             }
@@ -335,6 +561,8 @@ object CommandRegister {
                 this.execute { context ->
                     val sender = context.sender as? Player ?: return@execute
                     sender.isHoloDebug = !sender.isHoloDebug
+
+                    sender.sendTranslated("hologram.debug.${sender.isHoloDebug}")
                 }
             }
         }
