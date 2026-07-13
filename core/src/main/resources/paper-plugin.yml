@@ -3,6 +3,8 @@ version: '${project.version}'
 api-version: '1.21.11'
 loader: 'at.flauschigesalex.animated_holo.core._loader.AnimatedHoloPluginLoader'
 main: 'at.flauschigesalex.animated_holo.core.AnimatedHoloPlugin'
+authors: [ "FlauschigesAlex" ]
+website: https://modrinth.com/plugin/animatedholo
 
 dependencies:
   server:

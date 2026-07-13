@@ -8,6 +8,7 @@ import at.flauschigesalex.animated_holo.core.holo.command.HologramAttributeArgum
 import at.flauschigesalex.animated_holo.core.holo.isHoloDebug
 import at.flauschigesalex.animated_holo.core.holo.remove
 import at.flauschigesalex.animated_holo.core.utils.Colors
+import at.flauschigesalex.animated_holo.core.utils.Permissions
 import at.flauschigesalex.animated_holo.core.utils.Translate
 import at.flauschigesalex.animated_holo.core.utils.sendConsoleDenied
 import at.flauschigesalex.animated_holo.core.utils.sendTranslated
@@ -21,6 +22,7 @@ import at.flauschigesalex.animated_holo.lib.holo.position.toPosition
 import at.flauschigesalex.animated_holo.lib.utils.BukkitColor
 import at.flauschigesalex.animated_holo.lib.utils.ColorArgumentType
 import at.flauschigesalex.lib.minecraft.brigadier.CommandBuilder
+import at.flauschigesalex.lib.minecraft.brigadier.CommandContext
 import at.flauschigesalex.lib.minecraft.brigadier.types.internal.GreedyArgumentType
 import at.flauschigesalex.lib.minecraft.brigadier.types.internal.LiteralArgumentType
 import at.flauschigesalex.lib.minecraft.brigadier.types.primitive.BooleanArgumentType
@@ -29,6 +31,8 @@ import at.flauschigesalex.lib.minecraft.brigadier.types.primitive.StringArgument
 import at.flauschigesalex.lib.minecraft.brigadier.types.primitive.number.DoubleArgumentType
 import at.flauschigesalex.lib.minecraft.brigadier.types.primitive.number.FloatArgumentType
 import at.flauschigesalex.lib.minecraft.brigadier.types.primitive.number.IntegerArgumentType
+import net.kyori.adventure.key.Key
+import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.entity.Display
 import org.bukkit.entity.Player
@@ -39,8 +43,11 @@ object CommandRegister {
 
         CommandBuilder("hologram") {
             this.alias("holo", "aholo", "ahologram")
+            this.permission(Permissions.BASE)
             
             this.argument("create", LiteralArgumentType.literal()) {
+                this.permission(Permissions.MODIFY)
+                
                 this.argument("name", StringArgumentType.string()) {
                     this.suggestions { _ ->
                         var number: Int? = null
@@ -92,10 +99,16 @@ object CommandRegister {
                             error.printStackTrace()
                         }
                     }
+
+                    this.fail { it.sendInvalidSyntax() }
                 }
+
+                this.fail { it.sendInvalidSyntax() }
             }
             
             this.argument("near", LiteralArgumentType.literal().alias("list")) {
+                this.permission(Permissions.READ)
+                
                 this.argument("distance", IntegerArgumentType.positive()) {
                     this.suggestions(setOf("10", "30", "50", "90"))
                     this.optional()
@@ -121,10 +134,16 @@ object CommandRegister {
                             text + holograms.joinToString { "<newline><reset> <dark_gray>› ${Colors.highlight.asRichString()}${it.toRichDisplay()}</color>" }
                         }
                     }
+
+                    this.fail { it.sendInvalidSyntax() }
                 }
+
+                this.fail { it.sendInvalidSyntax() }
             }
             
             this.argument("move", LiteralArgumentType.literal()) {
+                this.permission(Permissions.MODIFY)
+                
                 this.argument("hologram", HologramArgumentType) {
                     this.execute { context ->
                         val sender = context.sender as? Player ?: return@execute context.sender.sendConsoleDenied()
@@ -135,10 +154,16 @@ object CommandRegister {
                         
                         sender.sendTranslated("hologram.move", "${Colors.highlight.asRichString()}${hologram.id}</color>")
                     }
+
+                    this.fail { it.sendInvalidSyntax() }
                 }
+
+                this.fail { it.sendInvalidSyntax() }
             }
             
             this.argument("tp", LiteralArgumentType.literal()) {
+                this.permission(Permissions.READ)
+                
                 this.argument("hologram", HologramArgumentType) {
                     this.execute { context ->
                         val sender = context.sender as? Player ?: return@execute context.sender.sendConsoleDenied()
@@ -147,10 +172,16 @@ object CommandRegister {
                         sender.teleport(hologram.position.toLocation())
                         sender.sendTranslated("hologram.teleport", "${Colors.highlight.asRichString()}${hologram.id}</color>")
                     }
+
+                    this.fail { it.sendInvalidSyntax() }
                 }
+
+                this.fail { it.sendInvalidSyntax() }
             }
             
             this.argument("edit", LiteralArgumentType.literal()) {
+                this.permission(Permissions.MODIFY)
+                
                 this.argument("hologram", HologramArgumentType) {
                     this.argument("text", LiteralArgumentType.literal()) {
                         this.argument("addline", LiteralArgumentType.literal()) {
@@ -197,7 +228,11 @@ object CommandRegister {
                                         sender.sendTranslated("hologram.edit.text.line.add", "${Colors.highlight.asRichString()}${holo.id}</color>", "${Colors.highlight.asRichString()}${lineNum}</color>")
                                     }
                                 }
+                                
+                                this.fail { it.sendInvalidSyntax() }
                             }
+
+                            this.fail { it.sendInvalidSyntax() }
                         }
                         
                         this.argument("editline", LiteralArgumentType.literal().alias("setline")) {
@@ -237,7 +272,11 @@ object CommandRegister {
                                         )
                                     }
                                 }
+
+                                this.fail { it.sendInvalidSyntax() }
                             }
+
+                            this.fail { it.sendInvalidSyntax() }
                         }
                         
                         this.argument("removeline", LiteralArgumentType.literal().alias("deleteline")) {
@@ -275,6 +314,8 @@ object CommandRegister {
                                     )
                                 }
                             }
+
+                            this.fail { it.sendInvalidSyntax() }
                         }
                         
                         this.argument("reset", LiteralArgumentType.literal()) {
@@ -290,6 +331,8 @@ object CommandRegister {
                                 )
                             }
                         }
+
+                        this.execute { it.sendInvalidSyntax() }
                     }
                     
                     this.argument("billboard", LiteralArgumentType.literal()) {
@@ -309,6 +352,8 @@ object CommandRegister {
                                 )
                             }
                         }
+
+                        this.fail { it.sendInvalidSyntax() }
                     }
                     
                     this.argument("scale", LiteralArgumentType.literal()) {
@@ -327,6 +372,8 @@ object CommandRegister {
                                 )
                             }
                         }
+
+                        this.fail { it.sendInvalidSyntax() }
                     }
 
                     this.argument("textAlign", LiteralArgumentType.literal()) {
@@ -346,6 +393,8 @@ object CommandRegister {
                                 )
                             }
                         }
+
+                        this.fail { it.sendInvalidSyntax() }
                     }
                     
                     this.argument("textShadow", LiteralArgumentType.literal()) {
@@ -365,6 +414,8 @@ object CommandRegister {
                                 )
                             }
                         }
+
+                        this.fail { it.sendInvalidSyntax() }
                     }
                     
                     this.argument("backgroundColor", LiteralArgumentType.literal()) {
@@ -401,6 +452,8 @@ object CommandRegister {
                                 )
                             }
                         }
+
+                        this.fail { it.sendInvalidSyntax() }
                     }
                     
                     this.argument("visibilityRange", LiteralArgumentType.literal()) {
@@ -417,12 +470,14 @@ object CommandRegister {
                                 holo.visibilityRange = range
                                 Configuration.updateHolo(holo)
 
-                                return@execute sender.sendTranslated("hologram.edit.scale",
+                                return@execute sender.sendTranslated("hologram.edit.visibility_range",
                                     "${Colors.highlight.asRichString()}${holo.id}</color>",
                                     "${Colors.highlight.asRichString()}~${range}</color>"
                                 )
                             }
                         }
+
+                        this.fail { it.sendInvalidSyntax() }
                     }
                     
                     this.argument("visibility", LiteralArgumentType.literal()) {
@@ -442,6 +497,8 @@ object CommandRegister {
                                 )
                             }
                         }
+                        
+                        this.fail { it.sendInvalidSyntax() }
                     }
                     
                     this.argument("attribute", LiteralArgumentType.literal()) {
@@ -504,7 +561,11 @@ object CommandRegister {
                                     )
                                 }
                             }
+
+                            this.fail { it.sendInvalidSyntax() }
                         }
+
+                        this.fail { it.sendInvalidSyntax() }
                     }
                     
                     this.argument("animation", LiteralArgumentType.literal()) {
@@ -537,11 +598,19 @@ object CommandRegister {
                                 )
                             }
                         }
+                        
+                        this.fail { it.sendInvalidSyntax() }
                     }
+
+                    this.fail { it.sendInvalidSyntax() }
                 }
+
+                this.fail { it.sendInvalidSyntax() }
             }
             
             this.argument("delete", LiteralArgumentType.literal()) {
+                this.permission(Permissions.MODIFY)
+                
                 this.argument("hologram", HologramArgumentType) {
                     this.execute { context ->
                         val sender = context.sender
@@ -555,9 +624,13 @@ object CommandRegister {
                         )
                     }
                 }
+
+                this.fail { it.sendInvalidSyntax() }
             }
             
             this.argument("debug", LiteralArgumentType.literal()) {
+                this.permission("minecraft.command.debug")
+                
                 this.execute { context ->
                     val sender = context.sender as? Player ?: return@execute
                     sender.isHoloDebug = !sender.isHoloDebug
@@ -565,6 +638,17 @@ object CommandRegister {
                     sender.sendTranslated("hologram.debug.${sender.isHoloDebug}")
                 }
             }
+            
+            this.fail { it.sendInvalidSyntax() }
         }
     }
+}
+
+private fun CommandContext.sendInvalidSyntax() {
+    val sender = this.sender
+    sender.sendTranslated("command.invalid-syntax", this.fullCommand) {
+        "${Colors.error.asRichString()}$it"
+    }
+    sender.sendTranslated("command.invalid-syntax.suggest", this.fullCommand)
+    sender.playSound(Sound.sound(Key.key("minecraft", "block.anvil.land"), Sound.Source.MASTER, .5f, 1f))
 }

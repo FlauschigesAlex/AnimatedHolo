@@ -2,10 +2,13 @@ package at.flauschigesalex.animated_holo.core.external_api
 
 import at.flauschigesalex.animated_holo.core.AnimatedHoloPlugin
 import at.flauschigesalex.animated_holo.core.Configuration
+import at.flauschigesalex.animated_holo.core.utils.Translate
 import com.comphenix.protocol.ProtocolLibrary
 import me.clip.placeholderapi.PlaceholderAPI
+import java.util.Locale
 import java.util.logging.Logger
 
+@Suppress("unused")
 object DependencyCheck {
     
     private val _missing = mutableSetOf<Dependency>()
@@ -21,7 +24,10 @@ object DependencyCheck {
     fun require(dependency: List<Dependency>, block: () -> Unit) {
         val missing = dependency.filterNot { it.isPresent }
         if (missing.isNotEmpty()) {
-            missing.forEach { if (_missing.add(it) && !Configuration.dependencyMissingNoWarn.contains(it.name)) it.onMissing(AnimatedHoloPlugin.instance.logger) }
+            missing.forEach {
+                if (_missing.add(it) && !Configuration.dependencyMissingNoWarn.contains(it.name))
+                    it.onMissing(AnimatedHoloPlugin.instance.logger)
+            }
             return
         }
         
@@ -33,14 +39,12 @@ enum class Dependency(check: () -> Boolean, internal val onMissing: (Logger) -> 
     PROTOCOL_LIB({
         runCatching { ProtocolLibrary.getProtocolManager() }.isSuccess
     }, { logger ->
-        // TODO
-        logger.warning("TODO SEND TRANSLATED PROTOCOL LIB MISSING MESSAGE")
+        logger.warning(Translate.translate("dependency.missing.PROTOCOL_LIB", Locale.getDefault()))
     }),
     PLACEHOLDER_API({
         runCatching { PlaceholderAPI.getPlaceholderPattern() }.isSuccess
     }, { logger ->
-        // TODO
-        logger.warning("TODO SEND TRANSLATED PLACEHOLDER API MISSING MESSAGE")
+        logger.warning(Translate.translate("dependency.missing.PLACEHOLDER_API", Locale.getDefault()))
     }),
     ;
     
