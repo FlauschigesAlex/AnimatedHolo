@@ -10,6 +10,7 @@ import at.flauschigesalex.rinth.project.version.MProjectVersionDifference
 import at.flauschigesalex.rinth.project.version.listener.PaperVersionUpdateListener
 import at.flauschigesalex.rinth.project.version.onChanges
 import at.flauschigesalex.rinth.utils.checker.version.VersionChecker
+import org.bstats.bukkit.Metrics
 import net.kyori.adventure.audience.Audience
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -30,6 +31,8 @@ class AnimatedHoloPlugin : JavaPlugin() {
         Holograms // Load Holograms
         CommandRegister // Register Commands
         PlaceholderIntegration.enable(this) // Enable Packet Listener
+        
+        val metrics = Metrics(this, 33396)
 
         PaperVersionUpdateListener(this) { audience ->
             scheduleAsync {

@@ -7,7 +7,7 @@
     <parent>
         <groupId>at.flauschigesalex.animated-holo</groupId>
         <artifactId>animated-holo-parent</artifactId>
-        <version>1.0.0-beta.3</version>
+        <version>1.0.0-beta.4</version>
     </parent>
     
     <artifactId>animated-holo-core</artifactId>
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>at.flauschigesalex.animated-holo</groupId>
             <artifactId>animated-holo-lib</artifactId>
-            <version>1.0.0-beta.3</version>
+            <version>1.0.0-beta.4</version>
             <scope>compile</scope>
         </dependency>
 
@@ -71,6 +71,14 @@
             <groupId>at.flauschigesalex.rinth</groupId>
             <artifactId>modrinth-version-api</artifactId>
             <version>1.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- BSTATS -->
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.2.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

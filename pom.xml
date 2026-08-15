@@ -6,7 +6,7 @@
 
     <groupId>at.flauschigesalex.animated-holo</groupId>
     <artifactId>animated-holo-parent</artifactId>
-    <version>1.0.0-beta.3</version>
+    <version>1.0.0-beta.4</version>
     <packaging>pom</packaging>
     
     <modules>
@@ -144,6 +144,10 @@
                         <relocation>
                             <pattern>at.flauschigesalex.lib</pattern>
                             <shadedPattern>at.flauschigesalex.animated_holo._lib</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>at.flauschigesalex.animated_holo.bStats</shadedPattern>
                         </relocation>
                     </relocations>
 
