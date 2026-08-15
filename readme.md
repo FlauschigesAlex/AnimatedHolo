@@ -7,16 +7,16 @@ It provides configurable hologram text, display settings, hover detection and si
 - [PlaceholderAPI 2.12.2 (or newer)](https://www.spigotmc.org/resources/placeholderapi.6245/) - Required together with ProtocolLib for per-player placeholder rendering.
 
 ### Supported platforms and versions
-- [Paper](https://papermc.io/software/paper/) Versions: 1.21.10 - 26.2
-- [PurpurMC](https://purpurmc.org/) Versions: 1.21.10 - 26.2
+- [Paper](https://papermc.io/software/paper/) Versions: 26.1 - 26.2
+- [PurpurMC](https://purpurmc.org/) Versions: 26.1 - 26.2
 
-Recommended Version: Paper 1.21.11 (or newer)
+Recommended Version: Paper 26.1 (or newer)
 <br>Although AnimatedHolo may work on other platforms or versions, I do not guarantee their stability or functionality.
 
 ## Setup
 ### Creating holograms
 `/hologram create <name>` - Creates a new hologram at your current location.
-<br>`/hologram near [distance]` - Lists the amount of holograms within the given distance. Defaults to `20`.
+<br>`/hologram near [distance]` - Lists the number of holograms within the given distance. Defaults to `20`.
 <br>`/hologram move <hologram>` - Moves an existing hologram to your current location.
 <br>`/hologram tp <hologram>` - Teleports you to an existing hologram.
 <br>`/hologram delete <hologram>` - Deletes an existing hologram.

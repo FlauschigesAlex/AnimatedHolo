@@ -1,8 +1,7 @@
 package at.flauschigesalex.animated_holo.lib.utils
 
 import at.flauschigesalex.lib.minecraft.brigadier.CommandArgumentType
-import at.flauschigesalex.lib.minecraft.paper.base.utils.Paper
-import at.flauschigesalex.lib.minecraft.paper.base.utils.Paper.name
+import at.flauschigesalex.lib.minecraft.paper.base.utils.name
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -11,6 +10,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import net.kyori.adventure.audience.Audience
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Color
 
 
@@ -29,13 +29,13 @@ object ColorArgumentType : CommandArgumentType<BukkitColor>() {
     override fun suggestType(value: String, sender: Audience): Boolean {
         if (value.matches(hexRegexSuggest)) return true
         value.toIntOrNull()?.let { return true }
-        return Paper.getNamedTextColorValues().any { it.name.startsWith(value, true) }
+        return NamedTextColor.NAMES.values().any { it.name.startsWith(value, true) }
     }
 
     override suspend fun parse(value: String, sender: Audience): BukkitColor? {
         if (value.matches(hexRegex)) return parseHexColor(value)
         value.toIntOrNull()?.let { return BukkitColor.fromARGB(it) }
-        return Paper.getNamedTextColorValues().find { it.name.equals(value, true) }?.value()?.let { BukkitColor.fromRGB(it) }
+        return NamedTextColor.NAMES.values().find { it.name.equals(value, true) }?.value()?.let { BukkitColor.fromRGB(it) }
     }
 
     private fun parseHexColor(value: String): BukkitColor? {
