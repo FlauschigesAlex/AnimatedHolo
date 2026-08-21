@@ -199,10 +199,10 @@ object CommandRegister {
                                     this.execute { context ->
                                         val sender = context.sender
                                         val holo = context.arguments.byType<HologramConfiguration>()?.value ?: return@execute
-                                        val lineNum = context.arguments.byType<Int>()?.value
                                         val line = context.arguments.greedyByType<String>()?.value?.joinToString(" ") ?: return@execute
                                         
                                         val lastLine = holo.richLines.size
+                                        val lineNum = context.arguments.byType<Int>()?.value ?: lastLine
 
                                         if (lineNum !in 0..lastLine) {
                                             sender.sendTranslated(
@@ -215,7 +215,7 @@ object CommandRegister {
                                             return@execute
                                         }
 
-                                        if (lineNum == null || lineNum == lastLine) {
+                                        if (lineNum == lastLine) {
                                             holo.richLines.addLast(line)
                                             Configuration.updateHolo(holo)
                                             sender.sendTranslated("hologram.edit.text.line.add", "${Colors.highlight.asRichString()}${holo.id}</color>", "${Colors.highlight.asRichString()}${lastLine}</color>")
